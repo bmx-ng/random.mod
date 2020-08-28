@@ -28,7 +28,7 @@
 
 #include "brl.mod/blitz.mod/blitz.h"
 #include <stdlib.h>
-#include <malloc.h>
+
 #include "SFMT.h"
 
 sfmt_t * bmx_sfmt_init_gen_rand(sfmt_t * sfmt, int seed) {
