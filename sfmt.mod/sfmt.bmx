@@ -58,7 +58,7 @@ ModuleInfo "CC_OPTS: -DMEXP=19937"
 ModuleInfo "CC_OPTS: -fno-strict-aliasing"
 ModuleInfo "CC_OPTS: -std=c11"
 
-Import BRL.Random
+Import Random.Core
 
 ?x86
 ModuleInfo "CC_OPTS: -msse2 -DHAVE_SSE2"

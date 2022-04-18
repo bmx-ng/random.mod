@@ -34,7 +34,7 @@ ModuleInfo "Copyright: xoshiro256++ - 2019 David Blackman and Sebastiano Vigna"
 ModuleInfo "History: 1.00"
 ModuleInfo "History: Initial Release."
 
-Import BRL.Random
+Import Random.Core
 Import "src/xoshiro256plusplus.c"
 
 Type TXoshiroRandom Extends TRandom
