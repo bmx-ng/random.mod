@@ -1,4 +1,4 @@
-' Copyright (c) 2020 Bruce A Henderson
+' Copyright (c) 2022 Bruce A Henderson
 '
 ' This software is provided 'as-is', without any express or implied
 ' warranty. In no event will the authors be held liable for any damages
@@ -26,11 +26,13 @@ bbdoc: Random Numbers - Xoshiro
 End Rem
 Module Random.Xoshiro
 
-ModuleInfo "Version: 1.00"
+ModuleInfo "Version: 1.01"
 ModuleInfo "License: zlib"
-ModuleInfo "Copyright: Wrapper - 2020 Bruce A Henderson"
+ModuleInfo "Copyright: Wrapper - 2022 Bruce A Henderson"
 ModuleInfo "Copyright: xoshiro256++ - 2019 David Blackman and Sebastiano Vigna"
 
+ModuleInfo "History: 1.01"
+ModuleInfo "History: Added GetName()."
 ModuleInfo "History: 1.00"
 ModuleInfo "History: Initial Release."
 
@@ -83,6 +85,10 @@ Type TXoshiroRandom Extends TRandom
 	
 	Method RndSeed:Int()
 		Return rnd_seed
+	End Method
+
+	Method GetName:String()
+		Return "Xoshiro"
 	End Method
 
 End Type
