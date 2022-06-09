@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2007-2020, Bruce A Henderson
+ Copyright (c) 2007-2022, Bruce A Henderson
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,11 @@ sfmt_t * bmx_sfmt_init_gen_rand(sfmt_t * sfmt, int seed) {
 #ifdef WIN32
 		sfmt = _aligned_malloc(sizeof(*sfmt), 16);
 #else
+#if defined(__APPLE__)
+		sfmt = aligned_alloc(16, sizeof(*sfmt));
+#else
 		sfmt = aligned_malloc(16, sizeof(*sfmt));
+#endif
 #endif
 	}
 	sfmt_init_gen_rand(sfmt, seed);

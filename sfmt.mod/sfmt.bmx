@@ -1,4 +1,4 @@
-' Copyright (c) 2007-2020, Bruce A Henderson
+' Copyright (c) 2007-2022, Bruce A Henderson
 ' All rights reserved.
 '
 ' Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,14 @@ bbdoc: Random Numbers - SFMT
 End Rem
 Module Random.SFMT
 
-ModuleInfo "Version: 1.06"
+ModuleInfo "Version: 1.07"
 ModuleInfo "License: BSD"
 ModuleInfo "Copyright: SFMT - 2006-2017 Mutsuo Saito, Makoto Matsumoto and Hiroshima"
-ModuleInfo "Copyright: Wrapper - 2007-2020 Bruce A Henderson"
+ModuleInfo "Copyright: Wrapper - 2007-2022 Bruce A Henderson"
 ModuleInfo "Modserver: BRL"
 
+ModuleInfo "History: 1.07"
+ModuleInfo "History: Added GetName()."
 ModuleInfo "History: 1.06"
 ModuleInfo "History: Integrated into new BRL.Random API."
 ModuleInfo "History: 1.05"
@@ -64,6 +66,10 @@ Import Random.Core
 ModuleInfo "CC_OPTS: -msse2 -DHAVE_SSE2"
 ?x64
 ModuleInfo "CC_OPTS: -msse2 -DHAVE_SSE2"
+?arm
+ModuleInfo "CC_OPTS: -DHAVE_NEON"
+?arm64
+ModuleInfo "CC_OPTS: -DHAVE_NEON"
 ?
 
 Import "common.bmx"
@@ -125,7 +131,11 @@ Type TSFMTRandom Extends TRandom
 			sfmtPtr = Null
 		End If
 	End Method
-	
+
+	Method GetName:String()
+		Return "SFMT"
+	End Method
+
 End Type
 
 
@@ -138,7 +148,7 @@ Type TSFMTRandomFactory Extends TRandomFactory
 	End Method
 	
 	Method GetName:String()
-		Return "SFMTRandom"
+		Return "SFMT"
 	End Method
 	
 	Method Create:TRandom(seed:Int)
