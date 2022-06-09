@@ -6,12 +6,15 @@ bbdoc: Math/Random numbers
 End Rem
 Module Random.Core
 
-ModuleInfo "Version: 1.09"
+ModuleInfo "Version: 1.10"
 ModuleInfo "Author: Mark Sibly, Floyd"
 ModuleInfo "License: zlib/libpng"
 ModuleInfo "Copyright: Blitz Research Ltd"
 ModuleInfo "Modserver: BRL"
 
+ModuleInfo "History: 1.10"
+ModuleInfo "History: Refactored to allow multiple generators."
+ModuleInfo "History: Added SetRandom(), GetRandomName() and GetRandomNames()."
 ModuleInfo "History: 1.09"
 ModuleInfo "History: Moved to Random.Core."
 ModuleInfo "History: 1.08"
@@ -33,21 +36,22 @@ Global GlobalRandom:TRandom
 
 Global random_factories:TRandomFactory
 
+Global random_names:String[]
 Public
 
 Type TRandomFactory
 	Field _succ:TRandomFactory
+
+	Field _instance:TRandom
 	
 	Method New()
-		If random_factories <> Null Then
-			Throw "Random already installed : " + random_factories.GetName()
-		End If
 		_succ=random_factories
 		random_factories=Self
 	End Method
 	
 	Method Init()
-		GlobalRandom = Create()
+		_instance = Create()
+		GlobalRandom = _instance
 	End Method
 	
 	Method GetName:String() Abstract
@@ -55,7 +59,39 @@ Type TRandomFactory
 	Method Create:TRandom(seed:Int) Abstract
 
 	Method Create:TRandom() Abstract
-		
+
+	Function Find:TRandomFactory(name:String)
+		Local factory:TRandomFactory = random_factories
+		While factory
+			If factory.GetName() = name Then
+				Return factory
+			End If
+
+			factory = factory._succ
+		Wend
+
+		Return Null
+	End Function
+
+	Function Create:TRandom(name:String)
+		Local factory:TRandomFactory = Find(name)
+
+		If factory Then
+			Return factory.Create()
+		End If
+
+		Return Null
+	End Function
+
+	Function Create:TRandom(seed:Int, name:String)
+		Local factory:TRandomFactory = Find(name)
+
+		If factory Then
+			Return factory.Create(seed)
+		End If
+
+		Return Null
+	End Function
 End Type
 
 Private
@@ -158,12 +194,60 @@ Type TRandom
 	End Rem
 	Method RndSeed:Int() Abstract
 
+	Rem
+	bbdoc: Gets the name of this random number generator
+	End Rem
+	Method GetName:String() Abstract
 End Type
+
+Rem
+bbdoc: Sets the current random number generator to @name.
+about: If no generator called @name is found, the current random number generator remains active.
+End Rem
+Function SetRandom(name:String)
+	Local factory:TRandomFactory = TRandomFactory.Find(name)
+	If factory Then
+		GlobalRandom = factory._instance
+	End If
+End Function
+
+Rem
+bbdoc: Gets the name of the current random number generator.
+returns: The name of the current random number generator, or #Null if none is set.
+End Rem
+Function GetRandomName:String()
+	If GlobalRandom Then
+		Return GlobalRandom.GetName()
+	End If 
+End Function
+
+Rem
+bbdoc: Gets the names of available random number generators.
+End Rem
+Function GetRandomNames:String[]()
+	If random_names Then
+		Return random_names
+	End If
+
+	Local names:String[] = New String[0]
+	
+	Local factory:TRandomFactory = random_factories
+	While factory
+		names :+ [ factory.GetName() ]
+		factory = factory._succ
+	Wend
+
+	random_names = names
+	Return random_names
+End Function
 
 Rem
 bbdoc: Creates a new TRandom instance.
 End Rem
-Function CreateRandom:TRandom()
+Function CreateRandom:TRandom(name:String = Null)
+	If name Then
+		Return TRandomFactory.Create(name)
+	End If
 	If GlobalRandom Then
 		Return random_factories.Create()
 	Else
@@ -174,7 +258,10 @@ End Function
 Rem
 bbdoc: Creates a new TRandom instance with the given @seed.
 End Rem
-Function CreateRandom:TRandom(seed:Int)
+Function CreateRandom:TRandom(seed:Int, name:String = Null)
+	If name Then
+		Return TRandomFactory.Create(seed, name)
+	End If
 	If GlobalRandom Then
 		Return random_factories.Create(seed)
 	Else
