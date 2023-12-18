@@ -26,9 +26,14 @@ bbdoc: Random Numbers - Secure
 End Rem
 Module Random.Secure
 
-ModuleInfo "Version: 1.00"
+ModuleInfo "Version: 1.01"
 ModuleInfo "License: zlib"
 ModuleInfo "Copyright: 2023 Bruce A Henderson"
+
+ModuleInfo "History: 1.01"
+ModuleInfo "History: Fixed use of bmx_secure_next_double()"
+ModuleInfo "History: 1.00"
+ModuleInfo "History: Initial Release."
 
 Import Random.Core
 
@@ -85,17 +90,34 @@ Type TSecureRandom Extends TRandom
 	End Method
 	
 	Method Rnd:Double(minValue:Double = 1, maxValue:Double = 0) Override
-		If maxValue > minValue Return RndDouble() * (maxValue - minValue) + minValue
-		Return RndDouble() * (minValue - maxValue) + maxValue
+?win32
+		If maxValue > minValue Return bmx_secure_next_double(context) * (maxValue - minValue) + minValue
+		Return bmx_secure_next_double(context) * (minValue - maxValue) + maxValue
+?macos
+		If maxValue > minValue Return bmx_secure_next_double() * (maxValue - minValue) + minValue
+		Return bmx_secure_next_double() * (minValue - maxValue) + maxValue
+?linux
+		If maxValue > minValue Return bmx_secure_next_double(fd) * (maxValue - minValue) + minValue
+		Return bmx_secure_next_double(fd) * (minValue - maxValue) + maxValue
+?
 	End Method
 	
 	Method Rand:Int(minValue:Int, maxValue:Int = 1) Override
 		Local Range:Double = maxValue - minValue
+?win32
+		If Range > 0 Return Int( bmx_secure_next_double(context)*(1:Double+Range) )+minValue
+		Return Int( bmx_secure_next_double(context)*(1:Double-Range) )+maxValue
+?macos
 		If Range > 0 Return Int( bmx_secure_next_double()*(1:Double+Range) )+minValue
 		Return Int( bmx_secure_next_double()*(1:Double-Range) )+maxValue
+?linux
+		If Range > 0 Return Int( bmx_secure_next_double(fd)*(1:Double+Range) )+minValue
+		Return Int( bmx_secure_next_double(fd)*(1:Double-Range) )+maxValue
+?
 	End Method
 	
 	Method SeedRnd(seed:Int) Override
+		' no op
 	End Method
 	
 	Method RndSeed:Int() Override
