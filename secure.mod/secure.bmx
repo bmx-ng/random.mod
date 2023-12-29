@@ -26,10 +26,12 @@ bbdoc: Random Numbers - Secure
 End Rem
 Module Random.Secure
 
-ModuleInfo "Version: 1.01"
+ModuleInfo "Version: 1.02"
 ModuleInfo "License: zlib"
 ModuleInfo "Copyright: 2023 Bruce A Henderson"
 
+ModuleInfo "History: 1.02"
+ModuleInfo "History: Fixed context type for Win32"
 ModuleInfo "History: 1.01"
 ModuleInfo "History: Fixed use of bmx_secure_next_double()"
 ModuleInfo "History: 1.00"
@@ -52,7 +54,7 @@ Type TSecureRandom Extends TRandom
 	Private
 
 ?win32
-	Field context:ULongInt
+	Field context:ULongInt Ptr
 ?linux
 	Field fd:Int
 ?
@@ -163,9 +165,9 @@ Extern
 ?macos
 	Function bmx_secure_next_double:Double()
 ?win32
-	Function bmx_secure_next_double:Double(context:ULongInt)
-	Function bmx_secure_destroy(context:ULongInt)
-	Function bmx_secure_init:ULongInt()
+	Function bmx_secure_next_double:Double(context:ULongInt Ptr)
+	Function bmx_secure_destroy(context:ULongInt Ptr)
+	Function bmx_secure_init:ULongInt Ptr()
 ?linux
 	Function bmx_secure_next_double:Double(fd:Int)
 	Function bmx_secure_init:Int()
