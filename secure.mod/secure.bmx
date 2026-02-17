@@ -1,4 +1,4 @@
-' Copyright (c) 2023 Bruce A Henderson
+' Copyright (c) 2023-2026 Bruce A Henderson
 '
 ' This software is provided 'as-is', without any express or implied
 ' warranty. In no event will the authors be held liable for any damages
@@ -26,10 +26,12 @@ bbdoc: Random Numbers - Secure
 End Rem
 Module Random.Secure
 
-ModuleInfo "Version: 1.02"
+ModuleInfo "Version: 1.03"
 ModuleInfo "License: zlib"
-ModuleInfo "Copyright: 2023 Bruce A Henderson"
-
+ModuleInfo "Copyright: 2023-2026 Bruce A Henderson"
+	
+ModuleInfo "History: 1.03"
+ModuleInfo "History: Added new Random methods."
 ModuleInfo "History: 1.02"
 ModuleInfo "History: Fixed context type for Win32"
 ModuleInfo "History: 1.01"
@@ -52,7 +54,7 @@ Import Random.Core
 Type TSecureRandom Extends TRandom
 
 	Private
-
+	Const SIGNBIT_64:ULong = $8000000000000000:ULong
 ?win32
 	Field context:ULongInt Ptr
 ?linux
@@ -117,7 +119,85 @@ Type TSecureRandom Extends TRandom
 		Return Int( bmx_secure_next_double(fd)*(1:Double-Range) )+maxValue
 ?
 	End Method
-	
+
+	Method RangeULong:ULong(lo:ULong, hi:ULong)
+		If lo > hi Then
+			Local t:ULong = lo
+			lo = hi
+			hi = t
+		End If
+
+		Local span:ULong = hi - lo + 1:ULong
+
+		' span==0 means full 0..2^64-1
+		If span = 0:ULong Then
+?win32
+			Return bmx_secure_random(context)
+?macos
+			Return bmx_secure_random()
+?linux
+			Return bmx_secure_random(fd)
+?
+		End If
+
+		Local max:ULong = $FFFFFFFFFFFFFFFF:ULong
+		Local limit:ULong = (max / span) * span - 1:ULong
+
+		Local r:ULong
+		Repeat
+?win32
+			r = bmx_secure_random(context)
+?macos
+			r = bmx_secure_random()
+?linux
+			r = bmx_secure_random(fd)
+?
+		Until r <= limit
+
+		Return lo + (r Mod span)
+	End Method
+
+	Method RandomByte:Byte(minValue:Byte, maxValue:Byte = 1)
+		Return Byte( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomShort:Short(minValue:Short, maxValue:Short = 1)
+		Return Short( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomUInt:UInt(minValue:UInt, maxValue:UInt = 1)
+		Return UInt( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomULong:ULong(minValue:ULong, maxValue:ULong = 1)
+		Return RangeULong(minValue, maxValue)
+	End Method
+
+	Method RandomULongInt:ULongInt(minValue:ULongInt, maxValue:ULongInt = 1)
+		Return ULongInt( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomSizeT:Size_T(minValue:Size_T, maxValue:Size_T = 1)
+		Return Size_T( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomLong:Long(minValue:Long, maxValue:Long = 1)
+		Local lo:ULong = ULong(minValue) ~ SIGNBIT_64
+		Local hi:ULong = ULong(maxValue) ~ SIGNBIT_64
+
+		Local u:ULong = RangeULong(lo, hi)
+
+		Return Long(u ~ SIGNBIT_64)
+	End Method
+
+	Method RandomInt:Int(minValue:Int, maxValue:Int = 1)
+		Return Int(RandomLong(minValue, maxValue))
+	End Method
+
+	Method RandomLongInt:LongInt(minValue:LongInt, maxValue:LongInt = 1)
+		Return LongInt(RandomLong(minValue, maxValue))
+	End Method
+
 	Method SeedRnd(seed:Int) Override
 		' no op
 	End Method
@@ -164,14 +244,17 @@ End Type
 Extern
 ?macos
 	Function bmx_secure_next_double:Double()
+	Function bmx_secure_random:ULong()
 ?win32
 	Function bmx_secure_next_double:Double(context:ULongInt Ptr)
 	Function bmx_secure_destroy(context:ULongInt Ptr)
 	Function bmx_secure_init:ULongInt Ptr()
+	Function bmx_secure_random:ULong(context:ULongInt Ptr)
 ?linux
 	Function bmx_secure_next_double:Double(fd:Int)
 	Function bmx_secure_init:Int()
 	Function bmx_secure_destroy(fd:Int)
+	Function bmx_secure_random(fd:Int)
 ?
 End Extern
 

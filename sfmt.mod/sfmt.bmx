@@ -1,4 +1,4 @@
-' Copyright (c) 2007-2022, Bruce A Henderson
+' Copyright (c) 2007-2026, Bruce A Henderson
 ' All rights reserved.
 '
 ' Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,14 @@ bbdoc: Random Numbers - SFMT
 End Rem
 Module Random.SFMT
 
-ModuleInfo "Version: 1.07"
+ModuleInfo "Version: 1.08"
 ModuleInfo "License: BSD"
 ModuleInfo "Copyright: SFMT - 2006-2017 Mutsuo Saito, Makoto Matsumoto and Hiroshima"
-ModuleInfo "Copyright: Wrapper - 2007-2022 Bruce A Henderson"
+ModuleInfo "Copyright: Wrapper - 2007-2026 Bruce A Henderson"
 ModuleInfo "Modserver: BRL"
 
+ModuleInfo "History: 1.08"
+ModuleInfo "History: Added new Random methods."
 ModuleInfo "History: 1.07"
 ModuleInfo "History: Added GetName()."
 ModuleInfo "History: 1.06"
@@ -79,6 +81,7 @@ bbdoc: An instance of a random number generator.
 End Rem
 Type TSFMTRandom Extends TRandom
 
+	Const SIGNBIT_64:ULong = $8000000000000000:ULong
 	Field sfmtPtr:Byte Ptr
 	Field rnd_seed:Int
 	
@@ -124,7 +127,75 @@ Type TSFMTRandom Extends TRandom
 	Method RndDouble:Double()
 		Return bmx_genrand_res53(sfmtPtr)
 	End Method
-	
+
+	Method RangeULong:ULong(lo:ULong, hi:ULong)
+		If lo > hi Then
+			Local t:ULong = lo
+			lo = hi
+			hi = t
+		End If
+
+		Local span:ULong = hi - lo + 1:ULong
+
+		' span==0 means full 0..2^64-1
+		If span = 0:ULong Then
+			Local v:ULong
+			bmx_gen_rand64(sfmtPtr, v)
+			Return v
+		End If
+
+		Local max:ULong = $FFFFFFFFFFFFFFFF:ULong
+		Local limit:ULong = (max / span) * span - 1:ULong
+
+		Local r:ULong
+		Repeat
+			bmx_gen_rand64(sfmtPtr, r)
+		Until r <= limit
+
+		Return lo + (r Mod span)
+	End Method
+
+	Method RandomByte:Byte(minValue:Byte, maxValue:Byte = 1)
+		Return Byte( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomShort:Short(minValue:Short, maxValue:Short = 1)
+		Return Short( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomUInt:UInt(minValue:UInt, maxValue:UInt = 1)
+		Return UInt( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomULong:ULong(minValue:ULong, maxValue:ULong = 1)
+		Return RangeULong(minValue, maxValue)
+	End Method
+
+	Method RandomULongInt:ULongInt(minValue:ULongInt, maxValue:ULongInt = 1)
+		Return ULongInt( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomSizeT:Size_T(minValue:Size_T, maxValue:Size_T = 1)
+		Return Size_T( RangeULong(ULong(minValue), ULong(maxValue)) )
+	End Method
+
+	Method RandomLong:Long(minValue:Long, maxValue:Long = 1)
+		Local lo:ULong = ULong(minValue) ~ SIGNBIT_64
+		Local hi:ULong = ULong(maxValue) ~ SIGNBIT_64
+
+		Local u:ULong = RangeULong(lo, hi)
+
+		Return Long(u ~ SIGNBIT_64)
+	End Method
+
+	Method RandomInt:Int(minValue:Int, maxValue:Int = 1)
+		Return Int(RandomLong(minValue, maxValue))
+	End Method
+
+	Method RandomLongInt:LongInt(minValue:LongInt, maxValue:LongInt = 1)
+		Return LongInt(RandomLong(minValue, maxValue))
+	End Method
+
 	Method Delete()
 		If sfmtPtr Then
 			bmx_sfmt_free(sfmtPtr)

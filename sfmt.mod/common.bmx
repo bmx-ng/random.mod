@@ -1,4 +1,4 @@
-' Copyright (c) 2007-2022, Bruce A Henderson
+' Copyright (c) 2007-2026, Bruce A Henderson
 ' All rights reserved.
 '
 ' Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,10 @@ Extern
 	Function bmx_sfmt_free(handle:Byte Ptr)
 ?bmxng
 	Function sfmt_genrand_uint32:UInt(handle:Byte Ptr)
-	Function bmx_gen_rand64(handle:Byte Ptr, v:ULong Ptr)
+	Function bmx_gen_rand64(handle:Byte Ptr, v:ULong Var)
 ?Not bmxng
 	Function sfmt_genrand_uint32:Int(handle:Byte Ptr)
-	Function bmx_gen_rand64(handle:Byte Ptr, v:Long Ptr)
+	Function bmx_gen_rand64(handle:Byte Ptr, v:Long Var)
 ?
 	
 	Function bmx_genrand_real1:Double(handle:Byte Ptr)

@@ -6,12 +6,14 @@ bbdoc: Math/Random numbers
 End Rem
 Module Random.Core
 
-ModuleInfo "Version: 1.10"
+ModuleInfo "Version: 1.11"
 ModuleInfo "Author: Mark Sibly, Floyd"
 ModuleInfo "License: zlib/libpng"
 ModuleInfo "Copyright: Blitz Research Ltd"
 ModuleInfo "Modserver: BRL"
 
+ModuleInfo "History: 1.11"
+ModuleInfo "History: Added new Random methods to TRandom."
 ModuleInfo "History: 1.10"
 ModuleInfo "History: Refactored to allow multiple generators."
 ModuleInfo "History: Added SetRandom(), GetRandomName() and GetRandomNames()."
@@ -143,16 +145,133 @@ End Rem
 Type TRandom
 	
 	Rem
-	bbdoc: Generate random float
+	bbdoc: Generates a random float
 	returns: A random float in the range 0 (inclusive) to 1 (exclusive)
 	End Rem
 	Method RndFloat:Float() Abstract
 	
 	Rem
-	bbdoc: Generate random double
+	bbdoc: Generates a random double
 	returns: A random double in the range 0 (inclusive) to 1 (exclusive)
 	End Rem
 	Method RndDouble:Double() Abstract
+
+	Rem
+	bbdoc: Generates a random integer
+	returns: A random integer in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomInt in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomInt(x)` | Random integer in the range 1 to x (inclusive)
+	* `RandomInt(x,y)` | Random integer in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomInt:Int(minValue:Int, maxValue:Int = 1) Abstract
+
+	Rem
+	bbdoc: Generates a random long
+	returns: A random long in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomLong in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomLong(x)` | Random long in the range 1 to x (inclusive)
+	* `RandomLong(x,y)` | Random long in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomLong:Long(minValue:Long, maxValue:Long = 1) Abstract
+
+	Rem
+	bbdoc: Generates a random short
+	returns: A random short in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomShort in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomShort(x)` | Random short in the range 1 to x (inclusive)
+	* `RandomShort(x,y)` | Random short in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomShort:Short(minValue:Short, maxValue:Short = 1) Abstract
+
+	Rem
+	bbdoc: Generates a random byte
+	returns: A random byte in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomByte in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomByte(x)` | Random byte in the range 1 to x (inclusive)
+	* `RandomByte(x,y)` | Random byte in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomByte:Byte(minValue:Byte, maxValue:Byte = 1) Abstract
+
+	Rem
+	bbdoc: Generates a random unsigned long
+	returns: A random unsigned long in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomULong in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomULong(x)` | Random unsigned long in the range 1 to x (inclusive)
+	* `RandomULong(x,y)` | Random unsigned long in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomULong:ULong(minValue:ULong, maxValue:ULong = 1) Abstract
+
+	Rem
+	bbdoc: Generates a random unsigned integer
+	returns: A random unsigned integer in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomUInt in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomUInt(x)` | Random unsigned integer in the range 1 to x (inclusive)
+	* `RandomUInt(x,y)` | Random unsigned integer in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomUInt:UInt(minValue:UInt, maxValue:UInt = 1) Abstract
+
+	Rem
+	bbdoc: Generates a random unsigned long integer
+	returns: A random unsigned long integer in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomULongInt in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomULongInt(x)` | Random unsigned long integer in the range 1 to x (inclusive)
+	* `RandomULongInt(x,y)` | Random unsigned long integer in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomLongInt:LongInt(minValue:LongInt, maxValue:LongInt = 1) Abstract
+
+	Rem
+	bbdoc: Generates a random unsigned long integer
+	returns: A random unsigned long integer in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomULongInt in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomULongInt(x)` | Random unsigned long integer in the range 1 to x (inclusive)
+	* `RandomULongInt(x,y)` | Random unsigned long integer in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomULongInt:ULongInt(minValue:ULongInt, maxValue:ULongInt = 1) Abstract
+
+	Rem
+	bbdoc: Generates a random size_t
+	returns: A random size_t in the range min (inclusive) to max (inclusive)
+	about:
+	The optional parameter allows you to use #RandomSizeT in 2 ways:
+	
+	[ @Format | @Result
+	* `RandomSizeT(x)` | Random size_t in the range 1 to x (inclusive)
+	* `RandomSizeT(x,y)` | Random size_t in the range x to y (inclusive)
+	]
+	End Rem
+	Method RandomSizeT:Size_T(minValue:Size_T, maxValue:Size_T = 1) Abstract
 	
 	Rem
 	bbdoc: Generate random double
@@ -270,7 +389,7 @@ Function CreateRandom:TRandom(seed:Int, name:String = Null)
 End Function
 
 Rem
-bbdoc: Generate random float
+bbdoc: Generates a random float
 returns: A random float in the range 0 (inclusive) to 1 (exclusive)
 End Rem
 Function RndFloat:Float()
@@ -282,7 +401,7 @@ Function RndFloat:Float()
 End Function
 
 Rem
-bbdoc: Generate random double
+bbdoc: Generates a random double
 returns: A random double in the range 0 (inclusive) to 1 (exclusive)
 End Rem
 Function RndDouble:Double()
@@ -294,7 +413,7 @@ Function RndDouble:Double()
 End Function
 
 Rem
-bbdoc: Generate random double
+bbdoc: Generates a random double
 returns: A random double in the range min (inclusive) to max (exclusive)
 about: 
 The optional parameters allow you to use Rnd in 3 ways:
@@ -314,7 +433,178 @@ Function Rnd:Double(minValue:Double = 1, maxValue:Double = 0)
 End Function
 
 Rem
-bbdoc: Generate random integer
+bbdoc: Generates a random integer
+returns: A random integer in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomInt in 2 ways:
+
+[ @Format | @Result
+* `RandomInt(x)` | Random integer in the range 1 to x (inclusive)
+* `RandomInt(x,y)` | Random integer in the range x to y (inclusive)
+]
+End Rem
+Function RandomInt:Int(minValue:Int, maxValue:Int = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomInt(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random long
+returns: A random long in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomLong in 2 ways:
+
+[ @Format | @Result
+* `RandomLong(x)` | Random long in the range 1 to x (inclusive)
+* `RandomLong(x,y)` | Random long in the range x to y (inclusive)
+]
+End Rem
+Function RandomLong:Long(minValue:Long, maxValue:Long = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomLong(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random short
+returns: A random short in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomShort in 2 ways:
+
+[ @Format | @Result
+* `RandomShort(x)` | Random short in the range 1 to x (inclusive)
+* `RandomShort(x,y)` | Random short in the range x to y (inclusive)
+]
+End Rem
+Function RandomShort:Short(minValue:Short, maxValue:Short = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomShort(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random byte
+returns: A random byte in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomByte in 2 ways:
+
+[ @Format | @Result
+* `RandomByte(x)` | Random byte in the range 1 to x (inclusive)
+* `RandomByte(x,y)` | Random byte in the range x to y (inclusive)
+]
+End Rem
+Function RandomByte:Byte(minValue:Byte, maxValue:Byte = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomByte(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random unsigned long
+returns: A random unsigned long in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomULong in 2 ways:
+
+[ @Format | @Result
+* `RandomULong(x)` | Random unsigned long in the range 1 to x (inclusive)
+* `RandomULong(x,y)` | Random unsigned long in the range x to y (inclusive)
+]
+End Rem
+Function RandomULong:ULong(minValue:ULong, maxValue:ULong = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomULong(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random unsigned integer
+returns: A random unsigned integer in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomUInt in 2 ways:
+
+[ @Format | @Result
+* `RandomUInt(x)` | Random unsigned integer in the range 1 to x (inclusive)
+* `RandomUInt(x,y)` | Random unsigned integer in the range x to y (inclusive)
+]
+End Rem
+Function RandomUInt:UInt(minValue:UInt, maxValue:UInt = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomUInt(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random unsigned long integer
+returns: A random unsigned long integer in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomULongInt in 2 ways:
+
+[ @Format | @Result
+* `RandomULongInt(x)` | Random unsigned long integer in the range 1 to x (inclusive)
+* `RandomULongInt(x,y)` | Random unsigned long integer in the range x to y (inclusive)
+]
+End Rem
+Function RandomLongInt:LongInt(minValue:LongInt, maxValue:LongInt = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomLongInt(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random unsigned long integer
+returns: A random unsigned long integer in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomULongInt in 2 ways:
+
+[ @Format | @Result
+* `RandomULongInt(x)` | Random unsigned long integer in the range 1 to x (inclusive)
+* `RandomULongInt(x,y)` | Random unsigned long integer in the range x to y (inclusive)
+]
+End Rem
+Function RandomULongInt:ULongInt(minValue:ULongInt, maxValue:ULongInt = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomULongInt(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random size_t
+returns: A random size_t in the range min (inclusive) to max (inclusive)
+about:
+The optional parameter allows you to use #RandomSizeT in 2 ways:
+
+[ @Format | @Result
+* `RandomSizeT(x)` | Random size_t in the range 1 to x (inclusive)
+* `RandomSizeT(x,y)` | Random size_t in the range x to y (inclusive)
+]
+End Rem
+Function RandomSizeT:Size_T(minValue:Size_T, maxValue:Size_T = 1)
+	If GlobalRandom Then
+		Return GlobalRandom.RandomSizeT(minValue, maxValue)
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Generates a random integer
 returns: A random integer in the range min (inclusive) to max (inclusive)
 about:
 The optional parameter allows you to use #Rand in 2 ways:
@@ -333,7 +623,7 @@ Function Rand:Int(minValue:Int, maxValue:Int = 1)
 End Function
 
 Rem
-bbdoc: Set random number generator seed
+bbdoc: Sets the random number generator seed
 End Rem
 Function SeedRnd(seed:Int)
 	If GlobalRandom Then
@@ -344,7 +634,7 @@ Function SeedRnd(seed:Int)
 End Function
 
 Rem
-bbdoc: Get random number generator seed
+bbdoc: Gets the random number generator seed
 returns: The current random number generator seed
 about: Used in conjunction with SeedRnd, RndSeed allows you to reproduce sequences of random
 numbers.
