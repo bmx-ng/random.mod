@@ -254,7 +254,7 @@ Extern
 	Function bmx_secure_next_double:Double(fd:Int)
 	Function bmx_secure_init:Int()
 	Function bmx_secure_destroy(fd:Int)
-	Function bmx_secure_random(fd:Int)
+	Function bmx_secure_random:ULong(fd:Int)
 ?
 End Extern
 

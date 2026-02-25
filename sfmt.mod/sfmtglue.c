@@ -39,7 +39,7 @@ sfmt_t * bmx_sfmt_init_gen_rand(sfmt_t * sfmt, int seed) {
 #if defined(__APPLE__)
 		sfmt = aligned_alloc(16, sizeof(*sfmt));
 #else
-		sfmt = aligned_malloc(16, sizeof(*sfmt));
+		sfmt = aligned_alloc(16, sizeof(*sfmt));
 #endif
 #endif
 	}
