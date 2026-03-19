@@ -58,6 +58,10 @@ Type TSquaresRandom Extends TRandom
 		SeedRnd seed
 		state.key = key
 	End Method
+
+	Method New(state:SState)
+		Self.state = state
+	End Method
 	
 	Method RndFloat:Float()
 		Return Float(SquaresToDouble(state))
@@ -160,10 +164,18 @@ Type TSquaresRandom Extends TRandom
 		state.key = key
 	End Method
 
-	Method GetName:String()
+	Method GetName:String() Override
 		Return "Squares"
 	End Method
 
+	Method SerializeState:String() Override
+		Local data:TJSONObject = New TJSONObject.Create()
+		data.Set("key", New TJSONString.Create(String.FromULong(state.key)))
+		data.Set("count", New TJSONString.Create(String.FromULong(state.count)))
+		data.Set("seed", New TJSONString.Create(String.FromInt(state.seed)))
+
+		Return data.SaveString(JSON_COMPACT, 0)
+	End Method
 End Type
 
 Private
@@ -185,7 +197,24 @@ Type TSquaresRandomFactory Extends TRandomFactory
 	Method Create:TRandom()
 		Return New TSquaresRandom()
 	End Method
-		
+
+	Method DeserializeState:TRandom(data:TJSONObject) Override
+		Local keyValue:TJSONString = TJSONString(data.Get("key"))
+		Local countValue:TJSONString = TJSONString(data.Get("count"))
+		Local seedValue:TJSONString = TJSONString(data.Get("seed"))
+
+		If Not keyValue Or Not countValue Or Not seedValue Then
+			Return Null
+		End If
+
+		Local state:SState
+		state.key = keyValue.Value().ToULong()
+		state.count = countValue.Value().ToULong()
+		state.seed = seedValue.Value().ToInt()
+
+		Return New TSquaresRandom(state)
+	End Method
+
 End Type
 
 

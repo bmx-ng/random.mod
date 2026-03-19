@@ -34,6 +34,8 @@ Import "sfmtglue.c"
 Extern
 	Function bmx_sfmt_init_gen_rand:Byte Ptr(handle:Byte Ptr, seed:Int)
 	Function bmx_sfmt_free(handle:Byte Ptr)
+	Function bmx_sfmt_from_state:Byte Ptr(state:String)
+	Function bmx_sfmt_to_state:String(handle:Byte Ptr)
 ?bmxng
 	Function sfmt_genrand_uint32:UInt(handle:Byte Ptr)
 	Function bmx_gen_rand64(handle:Byte Ptr, v:ULong Var)

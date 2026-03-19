@@ -56,6 +56,11 @@ Type TXoshiroRandom Extends TRandom
 	Method New(seed:Int)
 		SeedRnd seed
 	End Method
+
+	Method New(seed:Int, state:SState)
+		Self.rnd_seed = seed
+		Self.rnd_state = state
+	End Method
 	
 	Method RndFloat:Float()
 		Return Float(RndDouble())
@@ -154,8 +159,19 @@ Type TXoshiroRandom Extends TRandom
 		Return rnd_seed
 	End Method
 
-	Method GetName:String()
+	Method GetName:String() Override
 		Return "Xoshiro"
+	End Method
+
+	Method SerializeState:String() Override
+		Local data:TJSONObject = New TJSONObject.Create()
+		data.Set("rnd_seed", New TJSONString.Create(String.FromInt(rnd_seed)))
+		data.Set("rnd_state0", New TJSONString.Create(String.FromULong(rnd_state.rnd_state[0])))
+		data.Set("rnd_state1", New TJSONString.Create(String.FromULong(rnd_state.rnd_state[1])))
+		data.Set("rnd_state2", New TJSONString.Create(String.FromULong(rnd_state.rnd_state[2])))
+		data.Set("rnd_state3", New TJSONString.Create(String.FromULong(rnd_state.rnd_state[3])))
+
+		Return data.SaveString(JSON_COMPACT, 0)
 	End Method
 
 End Type
@@ -179,7 +195,28 @@ Type TXoshiroRandomFactory Extends TRandomFactory
 	Method Create:TRandom()
 		Return New TXoshiroRandom()
 	End Method
-		
+
+	Method DeserializeState:TRandom(data:TJSONObject) Override
+		Local rndSeedValue:TJSONString = TJSONString(data.Get("rnd_seed"))
+		Local rndState0Value:TJSONString = TJSONString(data.Get("rnd_state0"))
+		Local rndState1Value:TJSONString = TJSONString(data.Get("rnd_state1"))
+		Local rndState2Value:TJSONString = TJSONString(data.Get("rnd_state2"))
+		Local rndState3Value:TJSONString = TJSONString(data.Get("rnd_state3"))
+
+		If Not rndSeedValue Or Not rndState0Value Or Not rndState1Value Or Not rndState2Value Or Not rndState3Value Then
+			Return Null
+		End If
+
+		Local state:SState
+		state.rnd_state[0] = rndState0Value.Value().ToULong()
+		state.rnd_state[1] = rndState1Value.Value().ToULong()
+		state.rnd_state[2] = rndState2Value.Value().ToULong()
+		state.rnd_state[3] = rndState3Value.Value().ToULong()
+		Local seed:Int = rndSeedValue.Value().ToInt()
+
+		Return New TXoshiroRandom(seed, state)
+	End Method
+
 End Type
 
 Struct SState
