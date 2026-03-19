@@ -31,8 +31,8 @@
 
 #include "SFMT.h"
 
-sfmt_t * bmx_sfmt_init_gen_rand(sfmt_t * sfmt, int seed) {
-	if (sfmt == NULL) {
+static sfmt_t * bmx_sfmt_new() {
+	sfmt_t * sfmt = NULL;
 #ifdef WIN32
 		sfmt = _aligned_malloc(sizeof(*sfmt), 16);
 #else
@@ -42,6 +42,12 @@ sfmt_t * bmx_sfmt_init_gen_rand(sfmt_t * sfmt, int seed) {
 		sfmt = aligned_alloc(16, sizeof(*sfmt));
 #endif
 #endif
+	return sfmt;
+}
+
+sfmt_t * bmx_sfmt_init_gen_rand(sfmt_t * sfmt, int seed) {
+	if (sfmt == NULL) {
+		sfmt = bmx_sfmt_new();
 	}
 	sfmt_init_gen_rand(sfmt, seed);
 	return sfmt;
@@ -53,6 +59,24 @@ void bmx_sfmt_free(sfmt_t * sfmt) {
 #else
 	free(sfmt);
 #endif
+}
+
+sfmt_t * bmx_sfmt_from_state(BBString * state) {
+	if (state == &bbEmptyString || state->length == 0) {
+		return NULL;
+	}
+	sfmt_t * sfmt = bmx_sfmt_new();
+
+	int count = bbStringToBytesFromHex(state, (unsigned char*)sfmt, sizeof(*sfmt));
+	if (count != sizeof(*sfmt)) {
+		bmx_sfmt_free(sfmt);
+		return NULL;
+	}
+	return sfmt;
+}
+
+BBString * bmx_sfmt_to_state(sfmt_t * sfmt) {
+	return bbStringFromBytesAsHex((const unsigned char*)sfmt, sizeof(*sfmt), 0);
 }
 
 double bmx_genrand_real1(sfmt_t * sfmt) {

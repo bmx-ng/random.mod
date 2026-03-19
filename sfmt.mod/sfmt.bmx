@@ -93,6 +93,10 @@ Type TSFMTRandom Extends TRandom
 		rnd_seed = seed
 		sfmtPtr = bmx_sfmt_init_gen_rand(Null, seed)
 	End Method
+
+	Method New(sfmtPtr:Byte Ptr)
+		Self.sfmtPtr = sfmtPtr
+	End Method
 	
 	Method SeedRnd(seed:Int)
 		rnd_seed = seed
@@ -207,6 +211,12 @@ Type TSFMTRandom Extends TRandom
 		Return "SFMT"
 	End Method
 
+	Method SerializeState:String() Override
+		Local data:TJSONObject = New TJSONObject.Create()
+		data.Set("state", New TJSONString.Create(bmx_sfmt_to_state(sfmtPtr)))
+
+		Return data.SaveString(JSON_COMPACT, 0)
+	End Method
 End Type
 
 
@@ -229,7 +239,21 @@ Type TSFMTRandomFactory Extends TRandomFactory
 	Method Create:TRandom()
 		Return New TSFMTRandom()
 	End Method
-		
+
+	Method DeserializeState:TRandom(data:TJSONObject) Override
+		Local stateValue:TJSONString = TJSONString(data.Get("state"))
+
+		If Not stateValue Then
+			Return Null
+		End If
+
+		Local sfmtPtr:Byte Ptr = bmx_sfmt_from_state(stateValue.Value())
+		If Not sfmtPtr Then
+			Return Null
+		End If
+
+		Return New TSFMTRandom(sfmtPtr)
+	End Method
 End Type
 
 New TSFMTRandomFactory

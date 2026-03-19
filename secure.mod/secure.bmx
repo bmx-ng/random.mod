@@ -217,6 +217,14 @@ Type TSecureRandom Extends TRandom
 		bmx_secure_destroy(fd)
 ?
 	End Method
+
+	Method SerializeState:String()
+		Return Null
+	End Method
+
+	Method CanSaveState:Int()
+		Return False
+	End Method
 End Type
 
 Private
@@ -238,7 +246,10 @@ Type TSecureRandomFactory Extends TRandomFactory
 	Method Create:TRandom()
 		Return New TSecureRandom()
 	End Method
-		
+	
+	Method DeserializeState:TRandom(data:TJSONObject) Override
+		Return Null
+	End Method
 End Type
 
 Extern

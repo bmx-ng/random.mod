@@ -6,12 +6,14 @@ bbdoc: Math/Random numbers
 End Rem
 Module Random.Core
 
-ModuleInfo "Version: 1.11"
+ModuleInfo "Version: 1.12"
 ModuleInfo "Author: Mark Sibly, Floyd"
 ModuleInfo "License: zlib/libpng"
 ModuleInfo "Copyright: Blitz Research Ltd"
 ModuleInfo "Modserver: BRL"
 
+ModuleInfo "History: 1.12"
+ModuleInfo "History: Added support for saving and loading state - serialisation."
 ModuleInfo "History: 1.11"
 ModuleInfo "History: Added new Random methods to TRandom."
 ModuleInfo "History: 1.10"
@@ -31,6 +33,7 @@ ModuleInfo "History: Fixed Rand() with negative min value bug"
 ? Threaded
 Import BRL.Threads
 ?
+Import Text.JSON
 
 Private
 
@@ -94,6 +97,25 @@ Type TRandomFactory
 
 		Return Null
 	End Function
+
+	Method DeserializeState:TRandom(data:TJSONObject) Abstract
+
+	Method LoadState:TRandom(savedState:String)
+
+		If Not savedState Then
+			Return Null
+		End If
+
+		Local err:TJSONError
+		Local data:TJSONObject = TJSONObject(TJSON.Load(savedState, 0, err))
+
+		If err Or Not data Then
+			Return Null
+		End If
+
+		Return DeserializeState(data)
+
+	End Method
 End Type
 
 Private
@@ -317,7 +339,52 @@ Type TRandom
 	bbdoc: Gets the name of this random number generator
 	End Rem
 	Method GetName:String() Abstract
+
+	Rem
+	bbdoc: Returns a string representing the current state of the random number generator.
+	returns: A string representing the current state of the random number generator, or #Null if saving state is not supported by this generator.
+	about: The exact format of the string is implementation-defined, but it should contain all the information necessary to restore the state of the generator.
+	End Rem
+	Method SaveState:String()
+		If Not CanSaveState() Then
+			Return Null
+		End If
+
+		Local saveState:TJSONObject = New TJSONObject.Create()
+		saveState.Set("name", New TJSONString.Create(GetName()))
+
+		Local stateData:String = SerializeState()
+		saveState.Set("data", New TJSONString.Create(stateData))
+
+		Return saveState.SaveString(JSON_COMPACT, 0)
+	End Method
+
+	Method SerializeState:String() Abstract
+
+	Method CanSaveState:Int()
+		Return True
+	End Method
+
 End Type
+
+Rem
+bbdoc: Represents the result of attempting to load a random number generator state.
+about:
+
+| Value | Description |
+|-------|------------|
+| `Ok` | The state was successfully loaded. |
+| `InvalidString` | The string could not be parsed as a valid state. |
+| `UnknownGenerator` | The string specified a generator that is not available. |
+| `InvalidState` | The string specified a generator that was found, but the saved state was not valid for that generator. |
+
+End Rem
+Enum ERandomLoadState
+	Ok
+	InvalidString
+	UnknownGenerator
+	InvalidState
+End Enum
 
 Rem
 bbdoc: Sets the current random number generator to @name.
@@ -385,6 +452,82 @@ Function CreateRandom:TRandom(seed:Int, name:String = Null)
 		Return random_factories.Create(seed)
 	Else
 		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Gets a string representing the current state of the random number generator.
+End Rem
+Function RandomSaveState:String()
+	If GlobalRandom Then
+		Return GlobalRandom.SaveState()
+	Else
+		Throw "No Random installed. Maybe Import BRL.Random ?"
+	End If
+End Function
+
+Rem
+bbdoc: Gets a string representing the current state of a random number generator.
+End Rem
+Function RandomSaveState:String(random:TRandom)
+	If random Then
+		Return random.SaveState()
+	End If
+End Function
+
+Rem
+bbdoc: Loads a string representing the state of a random number generator, populating @instance with the restored generator.
+returns: ERandomLoadState.Ok if the state was successfully loaded, or another ERandomLoadState value indicating the type of failure.
+End Rem
+Function RandomLoadState:ERandomLoadState(savedState:String, instance:TRandom Var)
+	Local err:TJSONError
+	Local saved:TJSONObject = TJSONObject(TJSON.Load(savedState, 0, err))
+
+	If err Then
+		Return ERandomLoadState.InvalidString
+	End If
+
+	Local name:TJSONString = TJSONString(saved.Get("name"))
+
+	If Not name Then
+		Return ERandomLoadState.InvalidString
+	End If
+
+	Local data:TJSONString = TJSONString(saved.Get("data"))
+
+	If Not data Then
+		Return ERandomLoadState.InvalidString
+	End If
+
+	Local factory:TRandomFactory = random_factories
+	While factory
+		If factory.GetName() = name.Value() Then
+			instance = factory.LoadState(data.Value())
+			If instance Then
+				Return ERandomLoadState.Ok
+			Else
+				Return ERandomLoadState.InvalidState
+			End If
+		End If
+		factory = factory._succ
+	Wend
+
+	Return ERandomLoadState.UnknownGenerator
+
+End Function
+
+Rem
+bbdoc: Replaces the current random number generator with the one specified in the saved state string, and returns the new generator.
+returns: The new random number generator, or #Null if the state could not be loaded.
+about: If the string cannot be parsed, or the named generator is not found, or the saved state is not valid, the current random number generator remains active.
+After returning non-null, the current random number generator will be set to the generator specified in the saved state, with the next
+random number generated being the one following that of the saved state.
+End Rem
+Function RandomLoadState:TRandom(savedState:String)
+	Local instance:TRandom
+	If RandomLoadState(savedState, instance) Then
+		GlobalRandom = instance
+		Return instance
 	End If
 End Function
 

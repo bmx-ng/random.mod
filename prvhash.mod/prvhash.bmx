@@ -55,6 +55,11 @@ Type TPrvHashRandom Extends TRandom
 	Method New(seed:Int)
 		SeedRnd seed
 	End Method
+
+	Method New(state:SHashState, seed:Int)
+		Self.rnd_state = state
+		Self.rnd_seed = seed
+	End Method
 	
 	Method RndFloat:Float()
 		Return Float(RndDouble())
@@ -157,6 +162,15 @@ Type TPrvHashRandom Extends TRandom
 		Return "PRVHASH"
 	End Method
 
+	Method SerializeState:String() Override
+		Local data:TJSONObject = New TJSONObject.Create()
+		data.Set("rnd_seed", New TJSONString.Create(String.FromInt(rnd_seed)))
+		data.Set("seed", New TJSONString.Create(String.FromULong(rnd_state.seed)))
+		data.Set("lcg", New TJSONString.Create(String.FromULong(rnd_state.lcg)))
+		data.Set("hash", New TJSONString.Create(String.FromULong(rnd_state.hash)))
+
+		Return data.SaveString(JSON_COMPACT, 0)
+	End Method
 End Type
 
 Private
@@ -178,7 +192,24 @@ Type TPrvHashRandomFactory Extends TRandomFactory
 	Method Create:TRandom()
 		Return New TPrvHashRandom()
 	End Method
-		
+
+	Method DeserializeState:TRandom(data:TJSONObject) Override
+		Local rndSeedValue:TJSONString = TJSONString(data.Get("rnd_seed"))
+		Local seedValue:TJSONString = TJSONString(data.Get("seed"))
+		Local lcgValue:TJSONString = TJSONString(data.Get("lcg"))
+		Local hashValue:TJSONString = TJSONString(data.Get("hash"))
+
+		If Not rndSeedValue Or Not seedValue Or Not lcgValue Or Not hashValue Then
+			Return Null
+		End If
+
+		Local state:SHashState
+		state.seed = seedValue.Value().ToULong()
+		state.lcg = lcgValue.Value().ToULong()
+		state.hash = hashValue.Value().ToULong()
+
+		Return New TPrvHashRandom(state, rndSeedValue.Value().ToInt())
+	End Method
 End Type
 
 Struct SHashState
