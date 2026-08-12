@@ -59,9 +59,13 @@ Type TSquaresRandom Extends TRandom
 		state.key = key
 	End Method
 
+	Internal
+
 	Method New(state:SState)
 		Self.state = state
 	End Method
+
+	Public
 	
 	Method RndFloat:Float()
 		Return Float(SquaresToDouble(state))

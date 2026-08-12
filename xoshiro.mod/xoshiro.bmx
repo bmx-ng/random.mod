@@ -57,10 +57,14 @@ Type TXoshiroRandom Extends TRandom
 		SeedRnd seed
 	End Method
 
+	Internal
+
 	Method New(seed:Int, state:SState)
 		Self.rnd_seed = seed
 		Self.rnd_state = state
 	End Method
+	
+	Public
 	
 	Method RndFloat:Float()
 		Return Float(RndDouble())
