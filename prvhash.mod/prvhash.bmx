@@ -56,10 +56,14 @@ Type TPrvHashRandom Extends TRandom
 		SeedRnd seed
 	End Method
 
+	Internal
+
 	Method New(state:SHashState, seed:Int)
 		Self.rnd_state = state
 		Self.rnd_seed = seed
 	End Method
+
+	Public
 	
 	Method RndFloat:Float()
 		Return Float(RndDouble())
