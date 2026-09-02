@@ -247,7 +247,7 @@ Type TSecureRandomFactory Extends TRandomFactory
 		Return New TSecureRandom()
 	End Method
 	
-	Method DeserializeState:TRandom(data:TJSONObject) Override
+	Method DeserializeState:TRandom(data:String) Override
 		Return Null
 	End Method
 End Type
