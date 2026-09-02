@@ -167,13 +167,11 @@ Type TPrvHashRandom Extends TRandom
 	End Method
 
 	Method SerializeState:String() Override
-		Local data:TJSONObject = New TJSONObject.Create()
-		data.Set("rnd_seed", New TJSONString.Create(String.FromInt(rnd_seed)))
-		data.Set("seed", New TJSONString.Create(String.FromULong(rnd_state.seed)))
-		data.Set("lcg", New TJSONString.Create(String.FromULong(rnd_state.lcg)))
-		data.Set("hash", New TJSONString.Create(String.FromULong(rnd_state.hash)))
-
-		Return data.SaveString(JSON_COMPACT, 0)
+		Local data:String = String.FromInt(rnd_seed)
+		data :+ ":" + String.FromULong(rnd_state.seed)
+		data :+ ":" + String.FromULong(rnd_state.lcg)
+		data :+ ":" + String.FromULong(rnd_state.hash)
+		Return data
 	End Method
 End Type
 
@@ -197,22 +195,29 @@ Type TPrvHashRandomFactory Extends TRandomFactory
 		Return New TPrvHashRandom()
 	End Method
 
-	Method DeserializeState:TRandom(data:TJSONObject) Override
-		Local rndSeedValue:TJSONString = TJSONString(data.Get("rnd_seed"))
-		Local seedValue:TJSONString = TJSONString(data.Get("seed"))
-		Local lcgValue:TJSONString = TJSONString(data.Get("lcg"))
-		Local hashValue:TJSONString = TJSONString(data.Get("hash"))
+	Method DeserializeState:TRandom(data:String) Override
 
-		If Not rndSeedValue Or Not seedValue Or Not lcgValue Or Not hashValue Then
+		Local values:String[] = data.Split(":")
+
+		If values.Length <> 4 Then
+			Return Null
+		End If
+
+		Local rndSeedValue:String = values[0]
+		Local seedValue:String = values[1]
+		Local lcgValue:String = values[2]
+		Local hashValue:String = values[3]
+
+		If rndSeedValue = "" Or seedValue = "" Or lcgValue = "" Or hashValue = "" Then
 			Return Null
 		End If
 
 		Local state:SHashState
-		state.seed = seedValue.Value().ToULong()
-		state.lcg = lcgValue.Value().ToULong()
-		state.hash = hashValue.Value().ToULong()
+		state.seed = seedValue.ToULong()
+		state.lcg = lcgValue.ToULong()
+		state.hash = hashValue.ToULong()
 
-		Return New TPrvHashRandom(state, rndSeedValue.Value().ToInt())
+		Return New TPrvHashRandom(state, rndSeedValue.ToInt())
 	End Method
 End Type
 

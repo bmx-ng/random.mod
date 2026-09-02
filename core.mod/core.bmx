@@ -33,7 +33,6 @@ ModuleInfo "History: Fixed Rand() with negative min value bug"
 ? Threaded
 Import BRL.Threads
 ?
-Import Text.JSON
 
 Private
 
@@ -98,7 +97,7 @@ Type TRandomFactory
 		Return Null
 	End Function
 
-	Method DeserializeState:TRandom(data:TJSONObject) Abstract
+	Method DeserializeState:TRandom(data:String) Abstract
 
 	Method LoadState:TRandom(savedState:String)
 
@@ -106,14 +105,7 @@ Type TRandomFactory
 			Return Null
 		End If
 
-		Local err:TJSONError
-		Local data:TJSONObject = TJSONObject(TJSON.Load(savedState, 0, err))
-
-		If err Or Not data Then
-			Return Null
-		End If
-
-		Return DeserializeState(data)
+		Return DeserializeState(savedState)
 
 	End Method
 End Type
@@ -350,13 +342,7 @@ Type TRandom
 			Return Null
 		End If
 
-		Local saveState:TJSONObject = New TJSONObject.Create()
-		saveState.Set("name", New TJSONString.Create(GetName()))
-
-		Local stateData:String = SerializeState()
-		saveState.Set("data", New TJSONString.Create(stateData))
-
-		Return saveState.SaveString(JSON_COMPACT, 0)
+		Return GetName() + "|" + SerializeState()
 	End Method
 
 	Method SerializeState:String() Abstract
@@ -480,29 +466,29 @@ bbdoc: Loads a string representing the state of a random number generator, popul
 returns: ERandomLoadState.Ok if the state was successfully loaded, or another ERandomLoadState value indicating the type of failure.
 End Rem
 Function RandomLoadState:ERandomLoadState(savedState:String, instance:TRandom Var)
-	Local err:TJSONError
-	Local saved:TJSONObject = TJSONObject(TJSON.Load(savedState, 0, err))
 
-	If err Then
+	Local parts:String[] = savedState.Split("|")
+
+	If parts.Length <> 2 Then
 		Return ERandomLoadState.InvalidString
 	End If
 
-	Local name:TJSONString = TJSONString(saved.Get("name"))
+	Local name:String = parts[0]
 
-	If Not name Then
+	If name = "" Then
 		Return ERandomLoadState.InvalidString
 	End If
 
-	Local data:TJSONString = TJSONString(saved.Get("data"))
+	Local data:String = parts[1]
 
-	If Not data Then
+	If data = "" Then
 		Return ERandomLoadState.InvalidString
 	End If
 
 	Local factory:TRandomFactory = random_factories
 	While factory
-		If factory.GetName() = name.Value() Then
-			instance = factory.LoadState(data.Value())
+		If factory.GetName() = name Then
+			instance = factory.LoadState(data)
 			If instance Then
 				Return ERandomLoadState.Ok
 			Else

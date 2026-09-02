@@ -212,10 +212,7 @@ Type TSFMTRandom Extends TRandom
 	End Method
 
 	Method SerializeState:String() Override
-		Local data:TJSONObject = New TJSONObject.Create()
-		data.Set("state", New TJSONString.Create(bmx_sfmt_to_state(sfmtPtr)))
-
-		Return data.SaveString(JSON_COMPACT, 0)
+		Return bmx_sfmt_to_state(sfmtPtr)
 	End Method
 End Type
 
@@ -240,14 +237,13 @@ Type TSFMTRandomFactory Extends TRandomFactory
 		Return New TSFMTRandom()
 	End Method
 
-	Method DeserializeState:TRandom(data:TJSONObject) Override
-		Local stateValue:TJSONString = TJSONString(data.Get("state"))
+	Method DeserializeState:TRandom(data:String) Override
 
-		If Not stateValue Then
+		If Not data Then
 			Return Null
 		End If
 
-		Local sfmtPtr:Byte Ptr = bmx_sfmt_from_state(stateValue.Value())
+		Local sfmtPtr:Byte Ptr = bmx_sfmt_from_state(data)
 		If Not sfmtPtr Then
 			Return Null
 		End If

@@ -168,14 +168,13 @@ Type TXoshiroRandom Extends TRandom
 	End Method
 
 	Method SerializeState:String() Override
-		Local data:TJSONObject = New TJSONObject.Create()
-		data.Set("rnd_seed", New TJSONString.Create(String.FromInt(rnd_seed)))
-		data.Set("rnd_state0", New TJSONString.Create(String.FromULong(rnd_state.rnd_state[0])))
-		data.Set("rnd_state1", New TJSONString.Create(String.FromULong(rnd_state.rnd_state[1])))
-		data.Set("rnd_state2", New TJSONString.Create(String.FromULong(rnd_state.rnd_state[2])))
-		data.Set("rnd_state3", New TJSONString.Create(String.FromULong(rnd_state.rnd_state[3])))
+		Local data:String = String.FromInt(rnd_seed)
+		data :+ ":" + String.FromULong(rnd_state.rnd_state[0])
+		data :+ ":" + String.FromULong(rnd_state.rnd_state[1])
+		data :+ ":" + String.FromULong(rnd_state.rnd_state[2])
+		data :+ ":" + String.FromULong(rnd_state.rnd_state[3])
 
-		Return data.SaveString(JSON_COMPACT, 0)
+		Return data
 	End Method
 
 End Type
@@ -200,23 +199,33 @@ Type TXoshiroRandomFactory Extends TRandomFactory
 		Return New TXoshiroRandom()
 	End Method
 
-	Method DeserializeState:TRandom(data:TJSONObject) Override
-		Local rndSeedValue:TJSONString = TJSONString(data.Get("rnd_seed"))
-		Local rndState0Value:TJSONString = TJSONString(data.Get("rnd_state0"))
-		Local rndState1Value:TJSONString = TJSONString(data.Get("rnd_state1"))
-		Local rndState2Value:TJSONString = TJSONString(data.Get("rnd_state2"))
-		Local rndState3Value:TJSONString = TJSONString(data.Get("rnd_state3"))
+	Method DeserializeState:TRandom(data:String) Override
+
+		If Not data Then
+			Return Null
+		End If
+
+		Local parts:String[] = data.Split(":")
+		If Len(parts) <> 5 Then
+			Return Null
+		End If
+
+		Local rndSeedValue:String = parts[0]
+		Local rndState0Value:String = parts[1]
+		Local rndState1Value:String = parts[2]
+		Local rndState2Value:String = parts[3]
+		Local rndState3Value:String = parts[4]
 
 		If Not rndSeedValue Or Not rndState0Value Or Not rndState1Value Or Not rndState2Value Or Not rndState3Value Then
 			Return Null
 		End If
 
 		Local state:SState
-		state.rnd_state[0] = rndState0Value.Value().ToULong()
-		state.rnd_state[1] = rndState1Value.Value().ToULong()
-		state.rnd_state[2] = rndState2Value.Value().ToULong()
-		state.rnd_state[3] = rndState3Value.Value().ToULong()
-		Local seed:Int = rndSeedValue.Value().ToInt()
+		state.rnd_state[0] = rndState0Value.ToULong()
+		state.rnd_state[1] = rndState1Value.ToULong()
+		state.rnd_state[2] = rndState2Value.ToULong()
+		state.rnd_state[3] = rndState3Value.ToULong()
+		Local seed:Int = rndSeedValue.ToInt()
 
 		Return New TXoshiroRandom(seed, state)
 	End Method

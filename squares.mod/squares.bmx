@@ -173,12 +173,10 @@ Type TSquaresRandom Extends TRandom
 	End Method
 
 	Method SerializeState:String() Override
-		Local data:TJSONObject = New TJSONObject.Create()
-		data.Set("key", New TJSONString.Create(String.FromULong(state.key)))
-		data.Set("count", New TJSONString.Create(String.FromULong(state.count)))
-		data.Set("seed", New TJSONString.Create(String.FromInt(state.seed)))
-
-		Return data.SaveString(JSON_COMPACT, 0)
+		Local data:String = String.FromULong(state.key)
+		data :+ ":" + String.FromULong(state.count)
+		data :+ ":" + String.FromInt(state.seed)
+		Return data
 	End Method
 End Type
 
@@ -202,19 +200,24 @@ Type TSquaresRandomFactory Extends TRandomFactory
 		Return New TSquaresRandom()
 	End Method
 
-	Method DeserializeState:TRandom(data:TJSONObject) Override
-		Local keyValue:TJSONString = TJSONString(data.Get("key"))
-		Local countValue:TJSONString = TJSONString(data.Get("count"))
-		Local seedValue:TJSONString = TJSONString(data.Get("seed"))
-
-		If Not keyValue Or Not countValue Or Not seedValue Then
+	Method DeserializeState:TRandom(data:String) Override
+		If Not data Then
 			Return Null
 		End If
 
+		Local parts:String[] = data.Split(":")
+		If Len(parts) <> 3 Then
+			Return Null
+		End If
+
+		Local keyValue:String = parts[0]
+		Local countValue:String = parts[1]
+		Local seedValue:String = parts[2]
+
 		Local state:SState
-		state.key = keyValue.Value().ToULong()
-		state.count = countValue.Value().ToULong()
-		state.seed = seedValue.Value().ToInt()
+		state.key = keyValue.ToULong()
+		state.count = countValue.ToULong()
+		state.seed = seedValue.ToInt()
 
 		Return New TSquaresRandom(state)
 	End Method
