@@ -6,12 +6,14 @@ bbdoc: Math/Random numbers
 End Rem
 Module Random.Core
 
-ModuleInfo "Version: 1.13"
+ModuleInfo "Version: 1.14"
 ModuleInfo "Author: Mark Sibly, Floyd"
 ModuleInfo "License: zlib/libpng"
 ModuleInfo "Copyright: Blitz Research Ltd"
 ModuleInfo "Modserver: BRL"
 
+ModuleInfo "History: 1.14"
+ModuleInfo "History: Keep embedded random backends independent of BRL.Threads."
 ModuleInfo "History: 1.13"
 ModuleInfo "History: Keep the factory registry available on the single-core Pico runtime."
 ModuleInfo "History: 1.12"
@@ -32,7 +34,7 @@ ModuleInfo "History: Module is now SuperStrict"
 ModuleInfo "History: 1.05 Release"
 ModuleInfo "History: Fixed Rand() with negative min value bug"
 
-?Threaded And Not pico
+?Threaded And Not embedded
 Import BRL.Threads
 ?
 
@@ -115,13 +117,13 @@ End Type
 Private
 Global LastNewMs:Int = MilliSecs()
 Global SimultaneousNewCount:Int = 0
-?Threaded And Not pico
+?Threaded And Not embedded
 Global NewRandomMutex:TMutex = TMutex.Create()
 ?
 Public
 
 Function GenerateSeed:Int()
-	?Threaded And Not pico
+	?Threaded And Not embedded
 	NewRandomMutex.Lock
 	?
 	Local currentMs:Int = MilliSecs()
@@ -134,7 +136,7 @@ Function GenerateSeed:Int()
 		SimultaneousNewCount = 0
 		auxSeed = 0
 	End If
-	?Threaded And Not pico
+	?Threaded And Not embedded
 	NewRandomMutex.Unlock
 	?
 	
